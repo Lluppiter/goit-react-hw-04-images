@@ -1,39 +1,31 @@
 import styles from '../Searchbar/Searchbar.module.css'
 import { CiSearch } from "react-icons/ci";
 import PropTypes from 'prop-types'
-import React, { Component } from 'react';
+import { useState } from 'react';
 
-export class Searchbar extends Component {
-  static propTypes = {
-  handleSubmit: PropTypes.func.isRequired
-}
+export const Searchbar = ({handleSubmit}) => {  
+const [request, setRequest] = useState('')
 
-  state = {  
-    request: null
-  }
-
-
-  handleChange = (e) => {
-    this.setState({request: e.target.value})
+  const handleChange = (e) => {
+    setRequest(e.target.value)
   };
   
-  handleSubmit = evt => {
+  const onSubmit = evt => {
     evt.preventDefault()
-    this.props.handleSubmit(this.state.request)
+    handleSubmit(request)
   }
 
-  render() {
     return (
       <>
         <header className={styles.Searchbar}>
-          <form className={styles.SearchForm} onSubmit={this.handleSubmit}>
+          <form className={styles.SearchForm} onSubmit={onSubmit}>
             <button type="submit" className={styles.SearchFormButton}>
               <span className={styles.SearchFormButtonLabel}>Search</span>
               <CiSearch />
             </button>
 
             <input
-              onChange={this.handleChange}
+              onChange={handleChange}
               name="input"
               className={styles.SearchFormInput}
               type="text"
@@ -45,6 +37,9 @@ export class Searchbar extends Component {
         </header>
       </>
     );
-  }
-};
+  };
+
+Searchbar.propTypes = {
+  handleSubmit: PropTypes.func.isRequired
+}
 

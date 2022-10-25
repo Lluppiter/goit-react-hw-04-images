@@ -1,4 +1,3 @@
-import { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { Loader } from './Loader/Loader';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -7,74 +6,68 @@ import { Modal } from './Modal/Modal';
 import { fetchApi } from './api/api';
 import { mapper } from 'utils/Mapper';
 import styles from '../components/App.module.css'
+import { useState, useEffect } from 'react';
 
-export class App extends Component {
-  state = {
-    images: [],
-    loading: false,
-    page: 1,
-    request: null,
-    error: null,
-    isShown: false,
-    currentImage: null,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [request, setRequest] = useState(null);
+  const [error, setError] = useState(null);
+  const [isShown, setIsShown] = useState(false);
+  const [currentImage, setCurrentImage] = useState();
 
-  fetchImages = () => {
-    const {page, request } = this.state
+  const fetchImages = () => {
     fetchApi(page, request)
       .then(response =>
-        this.setState(prevState => ({
-          images: [...prevState.images, ...mapper(response.data.hits)],
-        }))
+        setImages(prevImages => [...prevImages, ...mapper(response.data.hits)])
       )
       .catch(error => {
-        this.setState({ error: error.message });
+        setError(error.message);
       })
       .finally(() => {
-        this.setState({ loading: false });
+        setLoading(false);
       });
   };
 
-  handleSubmit = data => {
-   this.setState({loading: true})
-    if (this.state.isShown) {
-      this.setState({images: []})      
+  const handleSubmit = data => {
+   setLoading(true)
+    if (isShown) {
+      setImages([])      
     }
-    this.setState({ request: data });
-    this.setState({ isShown: true });
+    setRequest(data);
+    setIsShown(true);
   };
 
-  changeCurrentImage = (url, tags) => {
-    this.setState({ currentImage: {url: url, tags: tags} })
+  const changeCurrentImage = (url, tags) => {
+    setCurrentImage({url: url, tags: tags})
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1}))
-  }
+  const loadMore = () => {
+    setPage(prevPage => prevPage + 1);
+  };
 
-  closeModal = () => { 
-    this.setState({currentImage: null})
-  }
+  const closeModal = () => {
+    setCurrentImage(null);
+  };
 
-  componentDidUpdate(prevProps, prevState) {
-    const { request, page } = this.state;
-    if ((prevState.request !== request && request) || prevState.page !== page) {
-      this.fetchImages();
+
+  useEffect(() => {
+    if (!request) {
+      return;
     }
-  };
+    fetchImages();
+  }, [request, page]);
 
-  render() {
-    const { loading, isShown, images, currentImage } = this.state;
     return (
       <div className = { styles.App }>
-        <Searchbar handleSubmit={this.handleSubmit} />
+        <Searchbar handleSubmit={handleSubmit} />
         {loading && <Loader />}
         {isShown && (<>
-        <ImageGallery images={images} openModal={this.changeCurrentImage } /> 
-          <Button text='Load More' handlerClick={this.loadMore} />
+        <ImageGallery images={images} openModal={changeCurrentImage } /> 
+          <Button text='Load More' handlerClick={loadMore} />
         </>)}
-        {currentImage && <Modal currentImage={currentImage} closeModal={ this.closeModal } />}
+        {currentImage && <Modal currentImage={currentImage} closeModal={ closeModal } />}
       </div>
     );
   }
-}
