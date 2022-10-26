@@ -5,7 +5,7 @@ import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { fetchApi } from './api/api';
 import { mapper } from 'utils/Mapper';
-import styles from '../components/App.module.css'
+import styles from '../components/App.module.css';
 import { useState, useEffect } from 'react';
 
 export const App = () => {
@@ -17,30 +17,20 @@ export const App = () => {
   const [isShown, setIsShown] = useState(false);
   const [currentImage, setCurrentImage] = useState();
 
-  const fetchImages = () => {
-    fetchApi(page, request)
-      .then(response =>
-        setImages(prevImages => [...prevImages, ...mapper(response.data.hits)])
-      )
-      .catch(error => {
-        setError(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
   const handleSubmit = data => {
-   setLoading(true)
+    setLoading(true);
     if (isShown) {
-      setImages([])      
+      setImages([]);
     }
     setRequest(data);
     setIsShown(true);
+    if (error) {
+      console.log(error);
+    }
   };
 
   const changeCurrentImage = (url, tags) => {
-    setCurrentImage({url: url, tags: tags})
+    setCurrentImage({ url: url, tags: tags });
   };
 
   const loadMore = () => {
@@ -51,23 +41,35 @@ export const App = () => {
     setCurrentImage(null);
   };
 
-
   useEffect(() => {
     if (!request) {
       return;
     }
-    fetchImages();
+    fetchApi(page, request)
+      .then(response =>
+        setImages(prevImages => [...prevImages, ...mapper(response.data.hits)])
+      )
+      .catch(error => {
+        setError(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [request, page]);
 
-    return (
-      <div className = { styles.App }>
-        <Searchbar handleSubmit={handleSubmit} />
-        {loading && <Loader />}
-        {isShown && (<>
-        <ImageGallery images={images} openModal={changeCurrentImage } /> 
-          <Button text='Load More' handlerClick={loadMore} />
-        </>)}
-        {currentImage && <Modal currentImage={currentImage} closeModal={ closeModal } />}
-      </div>
-    );
-  }
+  return (
+    <div className={styles.App}>
+      <Searchbar handleSubmit={handleSubmit} />
+      {loading && <Loader />}
+      {isShown && (
+        <>
+          <ImageGallery images={images} openModal={changeCurrentImage} />
+          <Button text="Load More" handlerClick={loadMore} />
+        </>
+      )}
+      {currentImage && (
+        <Modal currentImage={currentImage} closeModal={closeModal} />
+      )}
+    </div>
+  );
+};
