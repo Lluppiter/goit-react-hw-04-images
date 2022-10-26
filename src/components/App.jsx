@@ -24,6 +24,9 @@ export const App = () => {
     }
     setRequest(data);
     setIsShown(true);
+    if (error) {
+      console.log(error);
+    }
   };
 
   const changeCurrentImage = (url, tags) => {
